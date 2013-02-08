@@ -165,9 +165,15 @@ func (f *Font) GetOutline() int { return int(C.TTF_GetFontOutline(f.cfont)) }
 
 func (f *Font) SetOutline(outline int) { C.TTF_SetFontOutline(f.cfont, C.int(outline)) }
 
+<<<<<<< Updated upstream
 func (f *Font) GetHinting() int { return int(C.TTF_GetFontHinting(f.cfont)) }
 
 func (f *Font) SetHinting(hinting int) { C.TTF_SetFontHinting(f.cfont, C.int(hinting)) }
+=======
+// func (f *Font) GetHinting() int { return int(C.TTF_GetFontHinting(f.cfont)) }
+
+// func (f *Font) SetHinting(hinting int) { C.TTF_SetFontHinting(f.cfont, C.int(hinting)) }
+>>>>>>> Stashed changes
 
 // Returns the maximum height of all the glyphs of the font.
 func (f *Font) Height() int { return int(C.TTF_FontHeight(f.cfont)) }
