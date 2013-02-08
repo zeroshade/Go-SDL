@@ -64,6 +64,9 @@ const (
 	EVENT_RESERVED7       = 0x17
 	USEREVENT             = 0x18
 	NUMEVENTS             = 0x20
+	APPACTIVE             = 0x4
+	APPMOUSEFOCUS         = 0x1
+	APPINPUTFOCUS         = 0x2
 	ACTIVEEVENTMASK       = 0x2
 	KEYDOWNMASK           = 0x4
 	KEYUPMASK             = 0x8
