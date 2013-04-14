@@ -31,7 +31,11 @@ package sdl
 // static int RWclose(SDL_RWops *rw){return SDL_RWclose(rw);}
 // static int __SDL_SaveBMP(SDL_Surface *surface, const char *file) { return SDL_SaveBMP(surface, file); }
 import "C"
-import "unsafe"
+import (
+	"encoding/json"
+
+	"unsafe"
+)
 import "errors"
 import "image"
 import "image/draw"
@@ -205,6 +209,19 @@ func GL_SetAttribute(attr int, value int) int {
 	return int(C.SDL_GL_SetAttribute(C.SDL_GLattr(attr), C.int(value)))
 }
 
+func (r *Rect) UnmarshalJSON(b []byte) error {
+	var a [4]int
+	if err := json.Unmarshal(b, &a); err != nil {
+		return err
+	}
+	r.X = int16(a[0])
+	r.Y = int16(a[1])
+	r.W = uint16(a[2])
+	r.H = uint16(a[3])
+
+	return nil
+}
+
 // Swaps screen buffers.
 func (screen *Surface) Flip() int { return int(C.SDL_Flip((*C.SDL_Surface)(cast(screen)))) }
 
@@ -216,11 +233,15 @@ func (screen *Surface) Lock() int {
 	return int(C.SDL_LockSurface((*C.SDL_Surface)(cast(screen))))
 }
 
+func (screen *Surface) MustLock() bool {
+	return (screen.Offset != 0 || ((screen.Flags & (HWSURFACE | ASYNCBLIT | RLEACCEL)) != 0))
+}
+
 // Unlocks a previously locked surface.
 func (screen *Surface) Unlock() { C.SDL_UnlockSurface((*C.SDL_Surface)(cast(screen))) }
 
 func (dst *Surface) Blit(dstrect *Rect, src *Surface, srcrect *Rect) int {
-	var ret = C.SDL_UpperBlit(
+	var ret = C.SDL_BlitSurface(
 		(*C.SDL_Surface)(cast(src)),
 		(*C.SDL_Rect)(cast(srcrect)),
 		(*C.SDL_Surface)(cast(dst)),
@@ -344,6 +365,14 @@ func (img *Surface) Set(x, y int, c color.Color) {
 		pix := img.pixPtr(x, y)
 		pix.SetUint(uint64(MapRGBA(img.Format, uint8(r), uint8(g), uint8(b), uint8(a))))
 	}
+}
+
+func RectFromGoRect(re image.Rectangle) Rect {
+	return Rect{X: int16(re.Min.X), Y: int16(re.Min.Y), W: uint16(re.Dx()), H: uint16(re.Dy())}
+}
+
+func GoRectFromRect(re Rect) image.Rectangle {
+	return image.Rect(int(re.X), int(re.Y), int(re.X+int16(re.W)), int(re.Y+int16(re.H)))
 }
 
 func ColorFromGoColor(in color.Color) Color {
